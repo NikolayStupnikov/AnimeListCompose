@@ -27,4 +27,5 @@ ext {
     chuckVersion = '1.1.0'
     roomVersion = '2.2.6'
     compose_version = '1.0.1'
+    mockitoVersion='2.25.0'
 }
