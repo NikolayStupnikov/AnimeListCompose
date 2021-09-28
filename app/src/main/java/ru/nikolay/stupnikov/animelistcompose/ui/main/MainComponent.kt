@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,7 +42,8 @@ fun MainPageContent(
     doOnScroll: (Int, Boolean) -> Unit,
     clickFilter: () -> Unit,
     search: (String) -> Unit,
-    onClick: (id: Int, titles: Titles?) -> Unit
+    onClick: (id: Int, titles: Titles?) -> Unit,
+    isTest: Boolean
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -65,7 +67,8 @@ fun MainPageContent(
                     refresh = refresh,
                     doOnScroll = doOnScroll,
                     search = search,
-                    onClick = onClick
+                    onClick = onClick,
+                    isTest = isTest
                 )
             }
         )
@@ -85,7 +88,8 @@ fun MainBodyContent(
     refresh: () -> Unit,
     doOnScroll: (Int, Boolean) -> Unit,
     search: (String) -> Unit,
-    onClick: (id: Int, titles: Titles?) -> Unit
+    onClick: (id: Int, titles: Titles?) -> Unit,
+    isTest: Boolean
 ) {
     Column(modifier = Modifier
         .fillMaxWidth()
@@ -110,10 +114,12 @@ fun MainBodyContent(
                         ItemHolder(anime, onClick)
                     }
                 }
-                doOnScroll(
-                    listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1,
-                    listState.isScrollInProgress
-                )
+                if (!isTest) {
+                    doOnScroll(
+                        listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1,
+                        listState.isScrollInProgress
+                    )
+                }
             } else {
                 Column(
                     Modifier
@@ -156,7 +162,8 @@ fun ItemHolder(anime: AnimeApi, onClick: (id: Int, titles: Titles?) -> Unit) {
                     }
                 } else stringResource(R.string.no_name),
                 fontSize = 20.sp,
-                color = Color.Black
+                color = Color.Black,
+                modifier = Modifier.testTag(anime.id.toString())
             )
         }
         Divider(
@@ -174,7 +181,8 @@ fun EmptyList() {
         text = stringResource(id = R.string.swipe_to_update),
         color = Color.Black,
         fontSize = 16.sp,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
+        modifier = Modifier.testTag("emptyText")
     )
 }
 

@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -236,6 +237,7 @@ fun CategoriesSelection(
                     bottom = dimensionResource(id = R.dimen.margin_small)
                 )
                 .clickable(onClick = { isOpen.value = true })
+                .testTag("spinner")
         )
         DropDownList(
             requestToOpen = isOpen.value,
@@ -261,8 +263,8 @@ fun DropDownList(
             DropdownMenuItem(
                 onClick = {
                     request(false)
-                    selectedString(it)
-                }
+                    selectedString(it)},
+                modifier = Modifier.testTag(it.id.toString())
             ) {
                 Text(it.attributes?.title ?: it.attributes?.slug ?: "")
             }

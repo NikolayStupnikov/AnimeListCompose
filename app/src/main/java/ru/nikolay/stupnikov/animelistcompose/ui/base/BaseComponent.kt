@@ -18,9 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
@@ -66,7 +69,8 @@ fun ActionBarComponent(
                 title = {
                     Text(
                         text = title,
-                        color = Color.Black
+                        color = Color.Black,
+                        modifier = Modifier.semantics { contentDescription = "toolbar" }
                     )
                 },
                 actions = actions,
@@ -119,7 +123,7 @@ fun InputText(
             .background(
                 color = EditTextBackgroundColor,
                 shape = RoundedCornerShape(dimensionResource(id = R.dimen.radius_view))
-            ),
+            ).testTag("editText"),
         textStyle = TextStyle(
             color = Color.Black,
             fontSize = 15.sp

@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import ru.nikolay.stupnikov.animelistcompose.AnimeApp
 import ru.nikolay.stupnikov.animelistcompose.data.api.response.anime.Titles
 import ru.nikolay.stupnikov.animelistcompose.di.component.ActivityComponent
 import ru.nikolay.stupnikov.animelistcompose.ui.base.BaseActivity
@@ -34,7 +35,8 @@ class MainActivity : BaseActivity<MainViewModel>(), MainNavigator {
                     MainActivityScreen(
                         viewModel = mViewModel,
                         openFilter = this::openFilter,
-                        onClick = this::clickItem)
+                        onClick = this::clickItem,
+                        isTest = (application as AnimeApp).isTest)
                 }
             }
         }
@@ -74,7 +76,8 @@ class MainActivity : BaseActivity<MainViewModel>(), MainNavigator {
 private fun MainActivityScreen(
     viewModel: MainViewModel,
     openFilter: () -> Unit,
-    onClick: (id: Int, titles: Titles?) -> Unit
+    onClick: (id: Int, titles: Titles?) -> Unit,
+    isTest: Boolean
 ) {
     MainPageContent(
         animeList = viewModel.animeList,
@@ -84,6 +87,7 @@ private fun MainActivityScreen(
         doOnScroll = viewModel::doOnScroll,
         clickFilter = openFilter,
         search = viewModel::search,
-        onClick = onClick
+        onClick = onClick,
+        isTest = isTest
     )
 }

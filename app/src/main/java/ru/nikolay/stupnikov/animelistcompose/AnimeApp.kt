@@ -6,6 +6,7 @@ import ru.nikolay.stupnikov.animelistcompose.di.component.DaggerAppComponent
 
 class AnimeApp : Application() {
 
+    var isTest = false
     lateinit var appComponent: AppComponent
 
     override fun onCreate() {
