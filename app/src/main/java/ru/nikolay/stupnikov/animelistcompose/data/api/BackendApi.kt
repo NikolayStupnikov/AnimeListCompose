@@ -1,6 +1,6 @@
 package ru.nikolay.stupnikov.animelistcompose.data.api
 
-import io.reactivex.Single
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -13,14 +13,14 @@ import ru.nikolay.stupnikov.animelistcompose.data.api.response.detail.DetailResp
 interface BackendApi {
 
     @GET("anime")
-    fun requestAnimeList(@QueryMap params: Map<String, String>): Single<AnimeResponse>
+    suspend fun requestAnimeList(@QueryMap params: Map<String, String>): Response<AnimeResponse>
 
     @GET("categories?page[limit]=$PAGE_LIMIT")
-    fun requestCategoryList(@Query("page[offset]") offset: Int): Single<CategoryResponse>
+    suspend fun requestCategoryList(@Query("page[offset]") offset: Int): Response<CategoryResponse>
 
     @GET("anime/{id}")
-    fun getDetails(@Path("id") id: Int): Single<DetailResponse>
+    suspend fun getDetails(@Path("id") id: Int): Response<DetailResponse>
 
     @GET("anime/{id}/categories?page[limit]=$PAGE_LIMIT")
-    fun getCategoriesForAnime(@Path("id") id: Int): Single<CategoryResponse>
+    suspend fun getCategoriesForAnime(@Path("id") id: Int): Response<CategoryResponse>
 }

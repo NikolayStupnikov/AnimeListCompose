@@ -2,9 +2,11 @@ package ru.nikolay.stupnikov.animelistcompose.ui.main
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.nikolay.stupnikov.animelistcompose.StaticConfig
 import ru.nikolay.stupnikov.animelistcompose.data.DataManager
 import ru.nikolay.stupnikov.animelistcompose.data.api.response.anime.AnimeApi
@@ -13,7 +15,7 @@ import ru.nikolay.stupnikov.animelistcompose.ui.filter.Filter
 
 class MainViewModel(private val dataManager: DataManager): BaseViewModel<MainNavigator>() {
 
-    private var contentAnimeList: Disposable? = null
+    private var contentAnimeList: Job? = null
 
     var animeList = mutableStateListOf<AnimeApi>()
         private set
@@ -32,26 +34,25 @@ class MainViewModel(private val dataManager: DataManager): BaseViewModel<MainNav
 
     private fun getAnimeList() {
         mIsLoading.value = true
-        compositeRemove(contentAnimeList)
-        contentAnimeList = dataManager.requestAnimeList(offset, search, filter)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    mIsLoading.value = false
-                    if (it != null) {
-                        if (!it.result.isNullOrEmpty()) {
-                            animeList.addAll(it.result!!)
-                            offset += StaticConfig.PAGE_LIMIT
-                        }
-                        if (it.meta != null) {
-                            maxCount = it.meta!!.count
-                        }
-                    }
-                }, {
-                    mIsLoading.value = false
-                    getNavigator()?.showError(showErrorMessage(it))
-                })
-        compositeAdd(contentAnimeList)
+        contentAnimeList?.let {
+            if (it.isActive) it.cancel()
+        }
+        contentAnimeList = viewModelScope.launch {
+            dataManager.requestAnimeList(offset, search, filter).catch {
+                mIsLoading.value = false
+                getNavigator()?.showError(showErrorMessage(it))
+            }.collectLatest { animeResponse ->
+                mIsLoading.value = false
+                val list = animeResponse.result
+                if (!list.isNullOrEmpty()) {
+                    animeList.addAll(list)
+                    offset += StaticConfig.PAGE_LIMIT
+                }
+                animeResponse.meta?.let {
+                    maxCount = it.count
+                }
+            }
+        }
     }
 
     private fun restart() {

@@ -21,11 +21,10 @@ task clean(type: Delete) {
 
 ext {
     daggerVersion = '2.11'
-    retrofitVersion = '2.5.0'
+    retrofitVersion = '2.6.0'
     lifecycleVersion = '2.0.0'
     leakcanaryVersion = '1.5.4'
     chuckVersion = '1.1.0'
-    roomVersion = '2.2.6'
+    roomVersion = '2.3.0'
     compose_version = '1.0.1'
-    mockitoVersion='2.25.0'
 }

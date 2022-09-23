@@ -1,21 +1,22 @@
 package ru.nikolay.stupnikov.animelistcompose.ui.filter
 
 import androidx.compose.runtime.mutableStateListOf
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.nikolay.stupnikov.animelistcompose.StaticConfig
 import ru.nikolay.stupnikov.animelistcompose.data.DataManager
 import ru.nikolay.stupnikov.animelistcompose.data.api.response.category.CategoryApi
 import ru.nikolay.stupnikov.animelistcompose.data.api.response.category.CategoryAttribute
 import ru.nikolay.stupnikov.animelistcompose.data.database.entity.CategoryEntity
 import ru.nikolay.stupnikov.animelistcompose.ui.base.BaseViewModel
-import kotlin.concurrent.thread
 
 class FilterViewModel(private val dataManager: DataManager): BaseViewModel<Any>() {
 
-    private var contentCategoryCount: Disposable? = null
-    private var contentCategoryList: Disposable? = null
+    private var contentCategoryCount: Job? = null
+    private var contentCategoryList: Job? = null
 
     val selectSeasons: ArrayList<String> = ArrayList()
     val selectAgeRating: ArrayList<String> = ArrayList()
@@ -37,67 +38,73 @@ class FilterViewModel(private val dataManager: DataManager): BaseViewModel<Any>(
     }
 
     private fun getCategoryListFromNetwork() {
-        compositeRemove(contentCategoryList)
-        contentCategoryList = dataManager.requestCategoryList(offset)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    if (it != null) {
-                        if (it.meta != null) {
-                            maxCount = it.meta!!.count
-                        }
-                        if (!it.result.isNullOrEmpty()) {
-                            categoryList.addAll(it.result!!)
-                            offset += StaticConfig.PAGE_LIMIT
+        contentCategoryList?.let {
+            if (it.isActive) it.cancel()
+        }
+        contentCategoryList = viewModelScope.launch {
+            dataManager.requestCategoryList(offset).catch {
+            }.collectLatest {
+                it.meta?.let { meta ->
+                    maxCount = meta.count
+                }
+                val categories = it.result
+                if (!categories.isNullOrEmpty()) {
+                    categoryList.addAll(categories)
+                    offset += StaticConfig.PAGE_LIMIT
 
-                            if (offset < maxCount) {
-                                getCategoryList()
-                            } else {
-                                thread {
-                                    dataManager.insertCategories(categoryList.map {
-                                            category -> CategoryEntity(
-                                            category.id,
-                                            category.attributes?.title,
-                                            category.attributes?.slug
-                                        )
-                                    }.toList())
-                                }
-                            }
+                    if (offset < maxCount) {
+                        getCategoryList()
+                    } else {
+                        viewModelScope.launch {
+                            dataManager.insertCategories(
+                                categoryList.map { category ->
+                                    CategoryEntity(
+                                        category.id,
+                                        category.attributes?.title,
+                                        category.attributes?.slug
+                                    )
+                                }.toList()
+                            )
                         }
                     }
-                }, {})
-        compositeAdd(contentCategoryList)
+                }
+            }
+        }
     }
 
     private fun getCategoryListFromDb() {
-        compositeRemove(contentCategoryList)
-        contentCategoryList = dataManager.getAllCategories()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                categoryList.addAll(it.map {
-                        category -> CategoryApi(
-                        CategoryAttribute(category.title, category.slug),
-                        category.id
-                    )
-                }.toList())
-            }, {})
-        compositeAdd(contentCategoryList)
+        contentCategoryList?.let {
+            if (it.isActive) it.cancel()
+        }
+        contentCategoryList = viewModelScope.launch {
+            dataManager.getAllCategories().catch {
+            }.collectLatest {
+                categoryList.addAll(
+                    it.map { category ->
+                        CategoryApi(
+                            attributes = CategoryAttribute(category.title, category.slug),
+                            id = category.id
+                        )
+                    }.toList()
+                )
+            }
+        }
     }
 
     private fun getCategoryList() {
-        compositeRemove(contentCategoryCount)
-        contentCategoryCount = dataManager.getCountCategories()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
+        contentCategoryCount?.let {
+            if (it.isActive) it.cancel()
+        }
+        contentCategoryCount = viewModelScope.launch {
+            dataManager.getCountCategories().catch {
+            }.collectLatest {
                 if (it > 0) {
                     getCategoryListFromDb()
                 } else {
                     getCategoryListFromNetwork()
                 }
-            }, {})
-        compositeAdd(contentCategoryCount)
+            }
+        }
     }
 
     fun updateYear(year: String) {

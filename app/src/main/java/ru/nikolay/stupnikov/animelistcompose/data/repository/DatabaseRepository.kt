@@ -1,11 +1,11 @@
 package ru.nikolay.stupnikov.animelistcompose.data.repository
 
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
 import ru.nikolay.stupnikov.animelistcompose.data.database.entity.CategoryEntity
 
 interface DatabaseRepository {
 
-    fun getAllCategories(): Single<List<CategoryEntity>>
-    fun insertCategories(categories: List<CategoryEntity>)
-    fun getCountCategories(): Single<Int>
+    fun getAllCategories(): Flow<List<CategoryEntity>>
+    suspend fun insertCategories(categories: List<CategoryEntity>)
+    fun getCountCategories(): Flow<Int>
 }

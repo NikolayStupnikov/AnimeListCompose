@@ -73,11 +73,6 @@ dependencies {
     // coil
     implementation("io.coil-kt:coil-compose:1.3.2")
 
-    // rx
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.7'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    implementation 'com.jakewharton.rxrelay2:rxrelay:2.0.0'
-
     // di
     implementation "com.google.dagger:dagger:$rootProject.daggerVersion"
     kapt "com.google.dagger:dagger-android-processor:$rootProject.daggerVersion"
@@ -86,15 +81,13 @@ dependencies {
     // retrofit
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
-    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofitVersion"
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.12.0'
 
     //room
     implementation "androidx.room:room-runtime:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
-    implementation 'android.arch.persistence.room:rxjava2:1.1.1'
-    implementation "androidx.room:room-rxjava2:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
 
     // view model
     implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.lifecycleVersion"
@@ -110,17 +103,8 @@ dependencies {
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
     annotationProcessor "javax.annotation:javax.annotation-api:1.3.2"
 
-    // local unit tests
-    testImplementation "junit:junit:4.12"
-    testImplementation "org.mockito:mockito-core:$rootProject.mockitoVersion"
-    testImplementation "org.mockito:mockito-inline:$rootProject.mockitoVersion"
-    kaptTest "com.google.dagger:dagger-compiler:$rootProject.daggerVersion"
-
-    // ui tests
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
-    kaptAndroidTest "com.google.dagger:dagger-compiler:$rootProject.daggerVersion"
-    androidTestImplementation "org.mockito:mockito-android:$rootProject.mockitoVersion"
+    // coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
