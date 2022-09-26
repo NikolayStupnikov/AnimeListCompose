@@ -5,6 +5,7 @@ import ru.nikolay.stupnikov.animelistcompose.di.module.ActivityModule
 import ru.nikolay.stupnikov.animelistcompose.di.scope.ActivityScope
 import ru.nikolay.stupnikov.animelistcompose.ui.detail.DetailActivity
 import ru.nikolay.stupnikov.animelistcompose.ui.filter.FilterActivity
+import ru.nikolay.stupnikov.animelistcompose.ui.first.FirstActivity
 import ru.nikolay.stupnikov.animelistcompose.ui.main.MainActivity
 
 @ActivityScope
@@ -16,4 +17,6 @@ interface ActivityComponent {
     fun inject(activity: DetailActivity)
 
     fun inject(activity: FilterActivity)
+
+    fun inject(activity: FirstActivity)
 }

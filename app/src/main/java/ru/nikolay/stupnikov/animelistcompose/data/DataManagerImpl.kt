@@ -1,17 +1,20 @@
 package ru.nikolay.stupnikov.animelistcompose.data
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import retrofit2.Response
 import ru.nikolay.stupnikov.animelistcompose.StaticConfig.PAGE_LIMIT
 import ru.nikolay.stupnikov.animelistcompose.data.api.BackendApi
 import ru.nikolay.stupnikov.animelistcompose.data.api.response.anime.AnimeResponse
 import ru.nikolay.stupnikov.animelistcompose.data.api.response.category.CategoryResponse
-import ru.nikolay.stupnikov.animelistcompose.data.api.response.detail.DetailResponse
 import ru.nikolay.stupnikov.animelistcompose.data.database.AppDatabase
+import ru.nikolay.stupnikov.animelistcompose.data.database.entity.AnimeEntity
 import ru.nikolay.stupnikov.animelistcompose.data.database.entity.CategoryEntity
+import ru.nikolay.stupnikov.animelistcompose.data.database.entity.TitleEntity
+import ru.nikolay.stupnikov.animelistcompose.data.database.model.AnimeItem
 import ru.nikolay.stupnikov.animelistcompose.ui.filter.Filter
 import ru.nikolay.stupnikov.animelistcompose.ui.filter.FilterActivity
+import ru.nikolay.stupnikov.animelistcompose.util.getBody
 import ru.nikolay.stupnikov.animelistcompose.util.toSingleString
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,6 +26,9 @@ class DataManagerImpl
     private val database: AppDatabase
 ) : DataManager {
 
+    /*
+     * Запросы на сервер
+    */
     override fun requestAnimeList(offset: Int, search: String,  filter: Filter?): Flow<AnimeResponse> {
         val params = HashMap<String, String>()
         params["page[limit]"] = PAGE_LIMIT.toString()
@@ -51,14 +57,14 @@ class DataManagerImpl
         return flow { emit(backendApi.requestCategoryList(offset).getBody()) }
     }
 
-    override fun getDetails(id: Int): Flow<DetailResponse> {
-        return flow { emit(backendApi.getDetails(id).getBody()) }
-    }
-
     override fun getCategoriesForAnime(id: Int): Flow<CategoryResponse> {
         return flow { emit(backendApi.getCategoriesForAnime(id).getBody()) }
+            .catch { emit(CategoryResponse(emptyList(), null)) }
     }
 
+    /*
+    * Категории
+    */
     override fun getAllCategories(): Flow<List<CategoryEntity>> {
         return database.categoryDao().getAll()
     }
@@ -71,12 +77,29 @@ class DataManagerImpl
         return database.categoryDao().getCount()
     }
 
-    private fun <T> Response<T>.getBody(): T {
-        return if (isSuccessful) {
-                body() ?: error("Empty body")
-            } else {
-                error(errorBody()?.string() ?: "Server error")
-            }
+    /*
+    * Очистка БД
+    */
+    override suspend fun clearDatabase() {
+        database.clearAllTables()
     }
 
+    /*
+    * Аниме
+    */
+    override fun getCountAnime(): Flow<Int> {
+        return database.animeDao().getCount()
+    }
+
+    override suspend fun insertAnime(animeList: List<AnimeEntity>, titles: List<TitleEntity>) {
+        database.animeDao().insertAnimeAndHisTitle(animeList, titles)
+    }
+
+    override fun getAnimeList(offset: Int, search: String): Flow<List<AnimeItem>> {
+        return database.animeDao().getAnimeList(offset = offset)
+    }
+
+    override fun getDetails(id: Int): Flow<AnimeEntity> {
+        return database.animeDao().getDetails(id)
+    }
 }

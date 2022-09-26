@@ -10,6 +10,7 @@ import ru.nikolay.stupnikov.animelistcompose.ui.base.BaseActivity
 import ru.nikolay.stupnikov.animelistcompose.ui.base.BaseViewModel
 import ru.nikolay.stupnikov.animelistcompose.ui.detail.DetailViewModel
 import ru.nikolay.stupnikov.animelistcompose.ui.filter.FilterViewModel
+import ru.nikolay.stupnikov.animelistcompose.ui.first.FirstViewModel
 import ru.nikolay.stupnikov.animelistcompose.ui.main.MainViewModel
 
 @Module
@@ -43,5 +44,15 @@ class ActivityModule(private val activity: BaseActivity<out BaseViewModel<out An
             supplier
         )
         return ViewModelProvider(activity, factory).get(FilterViewModel::class.java)
+    }
+
+    @Provides
+    fun provideFirstViewModel(dataManager: DataManager): FirstViewModel {
+        val supplier: Supplier<FirstViewModel> = Supplier { FirstViewModel(dataManager) }
+        val factory: ViewModelProviderFactory<FirstViewModel> = ViewModelProviderFactory(
+            FirstViewModel::class.java,
+            supplier
+        )
+        return ViewModelProvider(activity, factory).get(FirstViewModel::class.java)
     }
 }

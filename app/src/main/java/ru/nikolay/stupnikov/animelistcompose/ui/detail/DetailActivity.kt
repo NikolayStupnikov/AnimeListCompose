@@ -6,7 +6,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import ru.nikolay.stupnikov.animelistcompose.R
-import ru.nikolay.stupnikov.animelistcompose.data.api.response.anime.Titles
+import ru.nikolay.stupnikov.animelistcompose.data.database.entity.TitleEntity
 import ru.nikolay.stupnikov.animelistcompose.di.component.ActivityComponent
 import ru.nikolay.stupnikov.animelistcompose.ui.base.BaseActivity
 import ru.nikolay.stupnikov.animelistcompose.ui.theme.AnimeListComposeTheme
@@ -45,7 +45,7 @@ class DetailActivity : BaseActivity<DetailViewModel>(), DetailNavigator {
     }
 
     private fun getTitleToolbar(): String {
-        val titles: Titles? = intent.getSerializableExtra(TITLES) as Titles?
+        val titles: TitleEntity? = intent.getSerializableExtra(TITLES) as TitleEntity?
         if (titles != null) {
             if (!titles.en.isNullOrEmpty()) {
                 return titles.en

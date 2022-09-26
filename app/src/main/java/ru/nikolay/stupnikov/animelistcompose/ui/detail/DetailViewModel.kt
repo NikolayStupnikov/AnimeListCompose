@@ -40,17 +40,15 @@ class DetailViewModel(private val dataManager: DataManager): BaseViewModel<Detai
                     getNavigator()?.onBackPressed()
                 }.collectLatest { (details, categoriesList) ->
                     mIsLoading.value = false
-                    details.result?.attributes?.let { attributes ->
-                        description.value = attributes.description ?: ""
-                        rating.value = attributes.ratingRank
-                        startDate.value = attributes.startDate ?: "-"
-                        endDate.value = attributes.endDate ?: "-"
-                        ageRating.value = "${attributes.ageRating}, ${attributes.ageRatingGuide}"
-                        episodeCount.value = attributes.episodeCount
-                        episodeLength.value = attributes.episodeLength
-                        categories.value = getStringCategories(categoriesList.result)
-                        imageUrl.value = attributes.posterImage?.original ?: ""
-                    } ?: getNavigator()?.onBackPressed()
+                    description.value = details.description ?: ""
+                    rating.value = details.ratingRank
+                    startDate.value = details.startDate ?: "-"
+                    endDate.value = details.endDate ?: "-"
+                    ageRating.value = "${details.ageRating}, ${details.ageRatingGuide}"
+                    episodeCount.value = details.episodeCount
+                    episodeLength.value = details.episodeLength
+                    categories.value = getStringCategories(categoriesList.result)
+                    imageUrl.value = details.posterImage ?: ""
                 }
         }
     }

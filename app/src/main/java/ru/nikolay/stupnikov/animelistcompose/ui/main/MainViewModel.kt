@@ -4,12 +4,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.nikolay.stupnikov.animelistcompose.StaticConfig
 import ru.nikolay.stupnikov.animelistcompose.data.DataManager
-import ru.nikolay.stupnikov.animelistcompose.data.api.response.anime.AnimeApi
+import ru.nikolay.stupnikov.animelistcompose.data.database.model.AnimeItem
 import ru.nikolay.stupnikov.animelistcompose.ui.base.BaseViewModel
 import ru.nikolay.stupnikov.animelistcompose.ui.filter.Filter
 
@@ -17,7 +16,7 @@ class MainViewModel(private val dataManager: DataManager): BaseViewModel<MainNav
 
     private var contentAnimeList: Job? = null
 
-    var animeList = mutableStateListOf<AnimeApi>()
+    var animeList = mutableStateListOf<AnimeItem>()
         private set
 
     var isRefreshing = mutableStateOf(false)
@@ -38,22 +37,26 @@ class MainViewModel(private val dataManager: DataManager): BaseViewModel<MainNav
             if (it.isActive) it.cancel()
         }
         contentAnimeList = viewModelScope.launch {
-            dataManager.requestAnimeList(offset, search, filter).catch {
-                mIsLoading.value = false
-                getNavigator()?.showError(showErrorMessage(it))
-            }.collectLatest { animeResponse ->
-                mIsLoading.value = false
-                val list = animeResponse.result
-                if (!list.isNullOrEmpty()) {
-                    animeList.addAll(list)
-                    offset += StaticConfig.PAGE_LIMIT
+            dataManager.getAnimeList(offset = offset, search = search)
+                .zip(getMaxCountFlow()) { animeList, count ->
+                    animeList to count
+                }.catch {
+                    mIsLoading.value = false
+                    getNavigator()?.showError(showErrorMessage(it))
+                }.collectLatest { (anime, count) ->
+                    mIsLoading.value = false
+                    if (anime.isNotEmpty()) {
+                        animeList.addAll(anime)
+                        offset += StaticConfig.PAGE_LIMIT
+                    }
+                    maxCount = count
                 }
-                animeResponse.meta?.let {
-                    maxCount = it.count
-                }
-            }
         }
     }
+
+    private fun getMaxCountFlow(): Flow<Int> =
+        if (maxCount == 0) dataManager.getCountAnime()
+        else flow { emit(maxCount) }
 
     private fun restart() {
         offset = 0

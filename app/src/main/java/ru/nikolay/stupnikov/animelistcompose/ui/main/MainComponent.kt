@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import ru.nikolay.stupnikov.animelistcompose.R
-import ru.nikolay.stupnikov.animelistcompose.data.api.response.anime.AnimeApi
-import ru.nikolay.stupnikov.animelistcompose.data.api.response.anime.Titles
+import ru.nikolay.stupnikov.animelistcompose.data.database.entity.TitleEntity
+import ru.nikolay.stupnikov.animelistcompose.data.database.model.AnimeItem
 import ru.nikolay.stupnikov.animelistcompose.ui.base.ActionBarComponent
 import ru.nikolay.stupnikov.animelistcompose.ui.base.InputText
 import ru.nikolay.stupnikov.animelistcompose.ui.base.NetworkImage
@@ -35,14 +35,14 @@ import ru.nikolay.stupnikov.animelistcompose.ui.theme.Gray
 
 @Composable
 fun MainPageContent(
-    animeList: List<AnimeApi>,
+    animeList: List<AnimeItem>,
     isLoading: Boolean,
     isRefreshing: Boolean,
     refresh: () -> Unit,
     doOnScroll: (Int, Boolean) -> Unit,
     clickFilter: () -> Unit,
     search: (String) -> Unit,
-    onClick: (id: Int, titles: Titles?) -> Unit,
+    onClick: (id: Int, titles: TitleEntity?) -> Unit,
     isTest: Boolean
 ) {
     Box(
@@ -83,24 +83,24 @@ fun MainPageContent(
 
 @Composable
 fun MainBodyContent(
-    animeList: List<AnimeApi>,
+    animeList: List<AnimeItem>,
     isRefreshing: Boolean,
     refresh: () -> Unit,
     doOnScroll: (Int, Boolean) -> Unit,
     search: (String) -> Unit,
-    onClick: (id: Int, titles: Titles?) -> Unit,
+    onClick: (id: Int, titles: TitleEntity?) -> Unit,
     isTest: Boolean
 ) {
     Column(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight()) {
-        InputText(
+        /*InputText(
             onTextChange = search,
             hint = R.string.search,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done,
                 keyboardType = KeyboardType.Text)
-        )
+        )*/
         SwipeRefresh(
             state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
             onRefresh = { refresh() },
@@ -134,8 +134,8 @@ fun MainBodyContent(
 }
 
 @Composable
-fun ItemHolder(anime: AnimeApi, onClick: (id: Int, titles: Titles?) -> Unit) {
-    Column(Modifier.clickable { onClick(anime.id, anime.attributes?.titles) }) {
+fun ItemHolder(anime: AnimeItem, onClick: (id: Int, titles: TitleEntity?) -> Unit) {
+    Column(Modifier.clickable { onClick(anime.id, anime.title) }) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(
@@ -145,18 +145,18 @@ fun ItemHolder(anime: AnimeApi, onClick: (id: Int, titles: Titles?) -> Unit) {
             )
         ) {
             NetworkImage(
-                anime.attributes?.posterImage?.original,
+                anime.posterImage,
                 Modifier.size(dimensionResource(id = R.dimen.logo_size)),
             )
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.margin_medium)))
             Text(
-                text = if (anime.attributes?.titles != null) {
-                    if (!anime.attributes.titles.en.isNullOrEmpty()) {
-                        anime.attributes.titles.en
-                    } else if (!anime.attributes.titles.enJp.isNullOrEmpty()) {
-                        anime.attributes.titles.enJp
-                    } else if (!anime.attributes.titles.jp.isNullOrEmpty()) {
-                        anime.attributes.titles.jp
+                text = if (anime.title != null) {
+                    if (!anime.title.en.isNullOrEmpty()) {
+                        anime.title.en
+                    } else if (!anime.title.enJp.isNullOrEmpty()) {
+                        anime.title.enJp
+                    } else if (!anime.title.jp.isNullOrEmpty()) {
+                        anime.title.jp
                     } else {
                         stringResource(R.string.no_name)
                     }

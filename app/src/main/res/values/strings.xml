@@ -21,4 +21,6 @@
     <string name="episode_count">Episode count:</string>
     <string name="episode_length">Episode Length:</string>
     <string name="categories_title">Categories:</string>
+    <string name="open_main_page">Open List Anime</string>
+    <string name="clear_base">Clear base</string>
 </resources>

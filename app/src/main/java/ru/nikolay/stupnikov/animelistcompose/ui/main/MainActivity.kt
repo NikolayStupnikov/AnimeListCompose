@@ -8,7 +8,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import ru.nikolay.stupnikov.animelistcompose.AnimeApp
-import ru.nikolay.stupnikov.animelistcompose.data.api.response.anime.Titles
+import ru.nikolay.stupnikov.animelistcompose.data.database.entity.TitleEntity
 import ru.nikolay.stupnikov.animelistcompose.di.component.ActivityComponent
 import ru.nikolay.stupnikov.animelistcompose.ui.base.BaseActivity
 import ru.nikolay.stupnikov.animelistcompose.ui.detail.DetailActivity
@@ -64,7 +64,7 @@ class MainActivity : BaseActivity<MainViewModel>(), MainNavigator {
         startActivityForResult(intent, FILTER_REQUEST_CODE)
     }
 
-    private fun clickItem(id: Int, titles: Titles?) {
+    private fun clickItem(id: Int, titles: TitleEntity?) {
         val intent = Intent(this, DetailActivity::class.java)
         intent.putExtra(ID_ANIME, id)
         intent.putExtra(TITLES, titles)
@@ -76,7 +76,7 @@ class MainActivity : BaseActivity<MainViewModel>(), MainNavigator {
 private fun MainActivityScreen(
     viewModel: MainViewModel,
     openFilter: () -> Unit,
-    onClick: (id: Int, titles: Titles?) -> Unit,
+    onClick: (id: Int, titles: TitleEntity?) -> Unit,
     isTest: Boolean
 ) {
     MainPageContent(
